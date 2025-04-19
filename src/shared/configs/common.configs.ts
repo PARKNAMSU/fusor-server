@@ -1,0 +1,1 @@
+export const SERVER_TIME_FORMAT_DEFAULT = "YYYY-MM-DD HH:mm:ss";
