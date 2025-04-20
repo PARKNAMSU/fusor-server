@@ -29,6 +29,7 @@ export interface PlatformRequestEntity
 
 export interface ApiKeyRegistryEntity {
   apiKey: string;
+  secretKey: string;
   status: Status;
   expiredAt: string;
 }

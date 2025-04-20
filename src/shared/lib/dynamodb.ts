@@ -177,7 +177,7 @@ export class FusorDynamoDB {
         // KeySchema // required
         {
           // KeySchemaElement
-          AttributeName: "hostname", // required
+          AttributeName: "apiKey", // required
           KeyType: "HASH", // required
         },
       ],

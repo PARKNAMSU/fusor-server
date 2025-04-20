@@ -1,55 +1,40 @@
 import { marshall } from "@aws-sdk/util-dynamodb";
-import dynamodb, { FusorDynamoDB, tables } from "../lib/dynamodb";
+import dynamodb, { tables } from "../lib/dynamodb";
 import { FusorRepository } from "./fusorRepository";
-import {
-  PlatformEntity,
-  PlatformRequestEntity,
-} from "../entity/platformEntity";
+import { PlatformEntity } from "../entity/platformEntity";
 import { Platform } from "../@types/platform.types";
 import dayjs from "dayjs";
 import { SERVER_TIME_FORMAT_DEFAULT } from "../configs/common.configs";
 
 export class platformRepository extends FusorRepository {
-  async getByHostname(hostname: string): Promise<PlatformEntity | null> {
+  async get({
+    hostname,
+    apiKey,
+  }: {
+    hostname?: string;
+    apiKey?: string;
+  }): Promise<PlatformEntity | null> {
+    const key: { [key: string]: string } = {};
     try {
-      return await this.db.getItem<PlatformEntity>({
-        TableName: tables.platform,
-        Key: marshall({
-          hostname,
-        }),
-      });
-    } catch (e) {
-      throw e;
-    }
-  }
-  async getByApiKey(apiKey: string): Promise<PlatformEntity | null> {
-    try {
-      return await this.db.getItem<PlatformEntity>({
-        TableName: tables.platform,
-        Key: marshall({
-          apiKey,
-        }),
-      });
-    } catch (e) {
-      throw e;
-    }
-  }
-  async CreatePlatformRequest(platform: Omit<Platform, "apiKey">) {
-    try {
-      const insertData: PlatformRequestEntity = {
-        ...platform,
-        requiredAt: dayjs().format(SERVER_TIME_FORMAT_DEFAULT),
-      };
+      if (!!hostname) {
+        key["hostname"] = hostname;
+      }
+      if (!!apiKey) {
+        key["apiKey"] = apiKey;
+      }
+      if (!Object.keys(key).length) {
+        throw new Error("not exist search key");
+      }
 
-      await this.db.putItem({
-        TableName: tables.platformRequest,
-        Item: marshall(insertData),
+      return await this.db.getItem<PlatformEntity>({
+        TableName: tables.platform,
+        Key: marshall(key),
       });
     } catch (e) {
       throw e;
     }
   }
-  async CreatePlatform(platform: Platform) {
+  async create(platform: Platform) {
     try {
       const insertData: PlatformEntity = {
         ...platform,
@@ -63,9 +48,6 @@ export class platformRepository extends FusorRepository {
     } catch (e) {
       throw e;
     }
-  }
-  async RegisterApiKey(): Promise<string> {
-    return "";
   }
 }
 
