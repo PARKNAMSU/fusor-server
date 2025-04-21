@@ -1,8 +1,10 @@
-import { FusorDynamoDB } from "../lib/dynamodb";
+import { FusorDynamoDB } from '../lib/dynamodb';
 
 export class FusorRepository {
-  db: FusorDynamoDB;
-  constructor(dynamo: FusorDynamoDB) {
-    this.db = dynamo;
-  }
+    table: string;
+    db: FusorDynamoDB;
+    constructor(dynamodb: FusorDynamoDB, table: string) {
+        this.table = table;
+        this.db = dynamodb;
+    }
 }

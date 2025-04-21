@@ -1,16 +1,21 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
+import controller from './account.init';
+import { invalidUrl } from '../shared/configs/response.configs';
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResultV2> => {
-    console.log(event);
-    const message = Object.keys(event).join(",")
     let response: APIGatewayProxyResultV2;
+
+    const method = event.httpMethod.toUpperCase();
+    const [, path1, path2] = event.path.split('/');
+
+    if (path1 !== 'account') {
+        return invalidUrl;
+    }
+
     try {
-        response = {
-            statusCode: 200,
-            body: JSON.stringify({
-                message:  message,
-            }),
-        };
+        if (method === 'PUT' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(path2)) {
+            return controller.signUp(event);
+        }
     } catch (err) {
         console.log(err);
         response = {
@@ -20,6 +25,5 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             }),
         };
     }
-
-    return response;
+    return invalidUrl;
 };

@@ -6,6 +6,7 @@ import {
 } from "../configs/option.configs";
 
 export interface Platform {
+  accountId: string;
   hostname: string;
   apiKey: string;
   roleList: string[];
