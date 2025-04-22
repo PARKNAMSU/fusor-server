@@ -1,12 +1,12 @@
 import { marshall } from '@aws-sdk/util-dynamodb';
-import { tables, FusorDynamoDB } from '../lib/dynamodb';
+import { tables, FusorDynamoDB, updateInputParsor } from '../lib/dynamodb';
 import { FusorRepository } from './fusorRepository';
 import { PlatformEntity } from '../entity/platformEntity';
-import { Platform } from '../@types/platform.types';
+import { Platform, UpdatePlatform } from '../@types/platform.types';
 import dayjs from 'dayjs';
 import { SERVER_TIME_FORMAT_DEFAULT } from '../configs/common.configs';
 
-export class platformRepository extends FusorRepository {
+export class PlatformRepository extends FusorRepository {
     constructor(dynamo: FusorDynamoDB) {
         super(dynamo, tables.platform);
     }
@@ -57,5 +57,34 @@ export class platformRepository extends FusorRepository {
             throw e;
         }
     }
-    async update(platform: Platform) {}
+    async update({
+        accountId,
+        roleList,
+        userInfoKeys,
+        IdentifierKey,
+        userAuthPolicy,
+        secondaryAuthPolicy,
+        userDeletePolicy,
+    }: UpdatePlatform) {
+        try {
+            await this.db.updateItem(
+                updateInputParsor({
+                    table: this.table,
+                    key: {
+                        accountId,
+                    },
+                    update: {
+                        roleList,
+                        userInfoKeys,
+                        IdentifierKey,
+                        userAuthPolicy,
+                        secondaryAuthPolicy,
+                        userDeletePolicy,
+                    },
+                }),
+            );
+        } catch (e) {
+            throw e;
+        }
+    }
 }

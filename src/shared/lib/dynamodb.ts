@@ -28,7 +28,6 @@ if (process.env.ENVIRONMENT === 'development') {
             secretAccessKey: 'dummy', // 로컬 테스트용 임의 시크릿
         },
         endpoint: 'http://host.docker.internal:8000',
-        region: 'ap-northeast-2',
     };
 }
 
@@ -42,6 +41,8 @@ interface FusorDynamoDBTransactionInput {
         Item?: Record<string, AttributeValue> | undefined;
         Key?: Record<string, AttributeValue> | undefined;
         UpdateExpression?: string;
+        ExpressionAttributeNames?: Record<string, string>;
+        ExpressionAttributeValues?: Record<string, AttributeValue>;
     };
     taskType: FusorTransactionTaskType;
 }
@@ -75,7 +76,14 @@ export class FusorDynamoDB {
             await this.client.send(
                 new TransactWriteItemsCommand({
                     TransactItems: tempTasks.map((task: FusorDynamoDBTransactionInput) => {
-                        const { TableName, Item, Key, UpdateExpression } = task.input;
+                        const {
+                            TableName,
+                            Item,
+                            Key,
+                            UpdateExpression,
+                            ExpressionAttributeNames,
+                            ExpressionAttributeValues,
+                        } = task.input;
                         switch (task.taskType) {
                             case 'put':
                                 return {
@@ -97,6 +105,8 @@ export class FusorDynamoDB {
                                         TableName,
                                         Key,
                                         UpdateExpression,
+                                        ExpressionAttributeNames,
+                                        ExpressionAttributeValues,
                                     },
                                 };
                         }
@@ -223,6 +233,10 @@ export class FusorDynamoDB {
                     AttributeName: 'id',
                     AttributeType: 'S',
                 },
+                {
+                    AttributeName: 'loginId',
+                    AttributeType: 'S',
+                },
             ],
             KeySchema: [
                 {
@@ -257,6 +271,10 @@ export class FusorDynamoDB {
                 },
                 {
                     AttributeName: 'hostname',
+                    AttributeType: 'S',
+                },
+                {
+                    AttributeName: 'accountId',
                     AttributeType: 'S',
                 },
             ],
@@ -410,4 +428,39 @@ export class FusorDynamoDB {
             }
         }
     }
+}
+
+export function updateInputParsor<T>({
+    table,
+    key,
+    update,
+}: {
+    table: string;
+    key: {
+        [key: string]: T;
+    };
+    update: {
+        [key: string]: any;
+    };
+}): UpdateItemCommandInput {
+    const updateKeys = Object.keys(update).filter((k) => {
+        return update[k] !== undefined;
+    });
+
+    const ExpressionAttributeNames: { [key: string]: string } = {};
+    const ExpressionAttributeValues: { [key: string]: any } = {};
+    const UpdateExpression: string[] = [];
+    updateKeys.forEach((k) => {
+        ExpressionAttributeNames[`#${k}`] = k;
+        ExpressionAttributeValues[`:${k}`] = update[k];
+        UpdateExpression.push(`#${k} = :${k}`);
+    });
+
+    return {
+        TableName: table,
+        Key: marshall(key),
+        UpdateExpression: `SET ${UpdateExpression.join(', ')}`,
+        ExpressionAttributeNames: ExpressionAttributeNames,
+        ExpressionAttributeValues: ExpressionAttributeValues,
+    };
 }

@@ -1,11 +1,14 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
 
 import redis from '../../shared/lib/redis';
+import { FusorDynamoDB } from '../../shared/lib/dynamodb';
+
+const dynamodb = new FusorDynamoDB(false);
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResultV2> => {
     let response: APIGatewayProxyResultV2;
     try {
-        // await dynamodb.initTable();
+        await dynamodb.initTable();
 
         // await dynamodb.putItem({
         //   TableName: tables.service,

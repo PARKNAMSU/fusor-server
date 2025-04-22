@@ -9,12 +9,15 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.788.0",
     "@aws-sdk/util-dynamodb": "^3.788.0",
+    "@middy/core": "^6.1.6",
+    "@middy/http-json-body-parser": "^6.1.6",
     "@upstash/redis": "^1.34.8",
     "aws-lambda": "^1.0.7",
     "axios": ">=1.6.0",
     "crypto": "^1.0.1",
     "dayjs": "^1.11.13",
     "lambda": "^0.10.3",
+    "middy": "^0.36.0",
     "uuid": "^11.1.0"
   },
   "scripts": {

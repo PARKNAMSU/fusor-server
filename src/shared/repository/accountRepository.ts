@@ -5,36 +5,44 @@ import { v4 as uuid } from 'uuid';
 import { generateHash } from '../lib/authenticate';
 import { getSecretPasswordKey } from '../configs/secret.configs';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { SERVER_TIME_FORMAT_DEFAULT } from '../configs/common.configs';
 import { AccountEntity } from '../entity/account';
 import { Account } from '../@types/account.types';
 import { AccountType } from '../configs/option.configs';
 
+dayjs.extend(utc);
+
 export class AccountRepository extends FusorRepository {
     constructor(dynamodb: FusorDynamoDB) {
         super(dynamodb, tables.account);
     }
-    async get({ id, loginId }: { id?: string; loginId?: string }): Promise<Account | null> {
-        const key: { [key: string]: string } = {};
-        if (id) {
-            key.id = id;
-        }
-        if (loginId) {
-            key.loginId = loginId;
-        }
-        if (!Object.keys(key).length) {
-            throw new Error('not exist search key');
-        }
-
+    async get(id: string): Promise<Account | null> {
         try {
             return await this.db.getItem<AccountEntity>({
                 TableName: this.table,
-                Key: marshall(key),
+                Key: marshall({
+                    id,
+                }),
             });
         } catch (e) {
             throw e;
         }
     }
+    async getByLoginId(loginId: string): Promise<Account | null> {
+        try {
+            const list = await this.db.listItems<AccountEntity>({
+                TableName: this.table,
+                IndexName: 'loginId_idx',
+                KeyConditionExpression: 'loginId = :loginId',
+                ExpressionAttributeValues: marshall({ [':loginId']: loginId }),
+            });
+            return list?.[0] || null;
+        } catch (e) {
+            throw e;
+        }
+    }
+
     async create({
         loginId,
         password,

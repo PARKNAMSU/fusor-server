@@ -48,7 +48,9 @@ todo
 
 ```
 docker run -d -p 8000:8000 amazon/dynamodb-local
-docker run -d -p 6379:6379 redis
+# dynamodb ui
+AWS_ACCESS_KEY_ID=dummy AWS_SECRET_ACCESS_KEY=dummy DYNAMO_ENDPOINT=http://localhost:8000 dynamodb-admin
+http://localhost:8001
 ```
 
 ### 플랫폼 클라이언트 API KEY 암호화
