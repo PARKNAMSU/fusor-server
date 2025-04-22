@@ -87,4 +87,16 @@ export class PlatformRepository extends FusorRepository {
             throw e;
         }
     }
+    async getList(accountId: string): Promise<PlatformEntity[]> {
+        try {
+            return await this.db.listItems<PlatformEntity>({
+                TableName: this.table,
+                IndexName: 'accountId_idx',
+                KeyConditionExpression: 'accountId = :accountId',
+                ExpressionAttributeValues: marshall({ [':accountId']: accountId }),
+            });
+        } catch (e) {
+            throw e;
+        }
+    }
 }

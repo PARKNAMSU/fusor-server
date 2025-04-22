@@ -15,3 +15,27 @@ export const invalidUrl: APIGatewayProxyResultV2 = {
         code: 'INVALID-URL',
     }),
 };
+
+export const notExistAccount: APIGatewayProxyResultV2 = {
+    statusCode: 401,
+    body: JSON.stringify({
+        message: 'not exist account',
+        code: 'NOT-EXIST-ACCOUNT',
+    }),
+};
+
+export const invalidPassword: APIGatewayProxyResultV2 = {
+    statusCode: 401,
+    body: JSON.stringify({
+        message: 'invalid password',
+        code: 'INVALID-PASSWORD',
+    }),
+};
+
+export const invalidLoginId: APIGatewayProxyResultV2 = {
+    statusCode: 401,
+    body: JSON.stringify({
+        code: 'INVALID-EMAIL',
+        message: 'invalid email',
+    }),
+};

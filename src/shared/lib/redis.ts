@@ -43,6 +43,10 @@ export class FusorRedis {
         }
     }
     async delete(k: string, sync = true) {
+        console.log({
+            k,
+            sync,
+        });
         try {
             if (sync) {
                 await this.client.del(k);
@@ -55,15 +59,20 @@ export class FusorRedis {
                     });
             }
         } catch (e) {
+            console.log(e);
             throw e;
         }
     }
-    async get<T>(k: string): Promise<T> {
+    async get<T>(k: string): Promise<T | null> {
         try {
             const data = await this.client.get(k);
-            return JSON.parse(data as string) as T;
+            if (!data) {
+                return null;
+            }
+            return data as T;
         } catch (e) {
-            throw e;
+            console.log(e);
+            return null;
         }
     }
     async getClient(): Promise<Redis> {
