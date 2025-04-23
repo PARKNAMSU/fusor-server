@@ -43,11 +43,11 @@ export class FusorRedis {
         }
     }
     async delete(k: string, sync = true) {
-        console.log({
-            k,
-            sync,
-        });
         try {
+            if (!k) {
+                console.warn('Invalid key for DEL:', k);
+                return;
+            }
             if (sync) {
                 await this.client.del(k);
             } else {
@@ -55,11 +55,12 @@ export class FusorRedis {
                     .del(k)
                     .then(() => {})
                     .catch((e) => {
-                        console.trace(e);
+                        console.log(e);
                     });
             }
+            return;
         } catch (e) {
-            console.log(e);
+            console.log('err: ', e);
             throw e;
         }
     }

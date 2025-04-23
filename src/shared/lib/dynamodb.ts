@@ -56,6 +56,7 @@ export const tables: { [key: string]: TableName } = {
     platformRequest: 'platformRequest',
     account: 'account',
     requestLog: 'requestLog',
+    adminAccount: 'adminAccount',
 };
 
 export class FusorDynamoDB {
@@ -158,11 +159,16 @@ export class FusorDynamoDB {
     async listItems<T>(input: QueryCommandInput): Promise<T[]> {
         try {
             const res = await this.client.send(new QueryCommand(input));
-            if (!res.Items) {
+            if (!res?.Items) {
                 return [];
             }
-            return res.Items.map((val: Record<string, AttributeValue>) => {
-                return unmarshall(val) as T;
+            return res.Items.map((val: Record<string, AttributeValue>): T => {
+                try {
+                    return unmarshall(val) as T;
+                } catch (e) {
+                    console.error(e);
+                    throw e;
+                }
             });
         } catch (e) {
             throw e;
@@ -224,6 +230,23 @@ export class FusorDynamoDB {
         if (process.env.ENVIRONMENT !== 'development') {
             return;
         }
+
+        const adminAccount: CreateTableCommandInput = {
+            TableName: tables.adminAccount,
+            BillingMode: BillingMode.PAY_PER_REQUEST,
+            AttributeDefinitions: [
+                {
+                    AttributeName: 'loginId',
+                    AttributeType: 'S',
+                },
+            ],
+            KeySchema: [
+                {
+                    AttributeName: 'loginId', // required
+                    KeyType: 'HASH', // required
+                },
+            ],
+        };
 
         const account: CreateTableCommandInput = {
             TableName: tables.account,
@@ -405,7 +428,7 @@ export class FusorDynamoDB {
             ],
         };
 
-        for (const input of [account, platform, platformRequest, apiKeyRegistry, user, blackList]) {
+        for (const input of [adminAccount, account, platform, platformRequest, apiKeyRegistry, user, blackList]) {
             let isExist = true;
             try {
                 await this.client.send(

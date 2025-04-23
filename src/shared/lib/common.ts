@@ -15,6 +15,10 @@ export function passwordCheck(str: string): boolean {
     return str.length >= 8 && /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+[\]{};:'",.<>/?\\|`~]).+$/.test(str);
 }
 
+export function domainCheck(domain: string): boolean {
+    return /^(?!https?:\/\/)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(domain);
+}
+
 export function cookieParsor(cookie: string): { [k: string]: string } {
     try {
         return Object.fromEntries(

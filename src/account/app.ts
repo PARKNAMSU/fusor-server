@@ -4,6 +4,15 @@ import { invalidUrl } from '../shared/configs/response.configs';
 import { AccountMiddleware } from './account.middleware';
 import { FusorRequest } from '../shared/@types/common.types';
 import { CommonMiddleware } from '../shared/lib/middleware';
+import { errorHandler } from '../shared/lib/response';
+
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught exception:', err);
+});
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResultV2> => {
     const req: FusorRequest = { ...event, customValues: {} };
@@ -33,33 +42,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             return await controller.signOut(req);
         }
     } catch (err: Error | APIGatewayProxyResultV2 | any) {
-        let response: APIGatewayProxyResultV2;
-        console.trace('here3');
-        response = {
-            statusCode: 500,
-            body: JSON.stringify({
-                message: 'some error happened',
-            }),
-        };
-        if (err instanceof Error) {
-            response = {
-                statusCode: 500,
-                body: JSON.stringify({
-                    message: err.message,
-                }),
-            };
-        } else if (typeof err === 'object' && 'statusCode' in err && 'body' in err) {
-            response = err as APIGatewayProxyResultV2;
-        }
-        return response;
+        return errorHandler(err);
     }
     return invalidUrl;
 };
-
-process.on('unhandledRejection', (reason) => {
-    console.error('Unhandled rejection:', reason);
-});
-
-process.on('uncaughtException', (err) => {
-    console.error('Uncaught exception:', err);
-});

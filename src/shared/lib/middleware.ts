@@ -1,6 +1,7 @@
 import { TokenData } from '../@types/account.types';
 import { FusorRequest } from '../@types/common.types';
-import { notExistAccount } from '../configs/response.configs';
+import { adminValidationFail, notExistAccount } from '../configs/response.configs';
+import { getAdminApiKey } from '../configs/secret.configs';
 import { cookieParsor } from './common';
 import redis from './redis';
 import { generateResponse } from './response';
@@ -22,6 +23,7 @@ export class CommonMiddleware {
             if (!tokenData) throw notExistAccount;
 
             this.event.customValues['tokenData'] = tokenData;
+            this.event.customValues['sessionId'] = cookies['session_id'];
         } catch (e) {
             throw e;
         }
@@ -35,6 +37,16 @@ export class CommonMiddleware {
                 ...this.event.customValues,
                 ...JSON.parse(this.event.body),
             };
+        } catch (e) {
+            throw e;
+        }
+    }
+    async adminValidation() {
+        try {
+            const apiKey = this.event.headers['X-admin-api-key'];
+            if (apiKey !== getAdminApiKey()) {
+                throw adminValidationFail;
+            }
         } catch (e) {
             throw e;
         }

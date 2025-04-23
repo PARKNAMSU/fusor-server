@@ -1,6 +1,5 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayProxyResultV2 } from 'aws-lambda';
 import { AccountService } from './account.service';
-import { SignUpRequestDto } from './account.dto';
 import { invalidBody } from '../shared/configs/response.configs';
 import { generateResponse } from '../shared/lib/response';
 import { FusorRequest } from '../shared/@types/common.types';
@@ -14,12 +13,20 @@ export class AccountController {
         try {
             const { loginId, password } = event.customValues;
 
+            const data = await this.service.signUp({
+                loginId: loginId as string,
+                password: password as string,
+            });
+
             return generateResponse({
                 code: 201,
-                data: await this.service.signUp({
-                    loginId: loginId as string,
-                    password: password as string,
-                }),
+                data,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Set-Cookie': `sessionId=${data.sessionId}; Path=/; HttpOnly; Secure; SameSite=None`,
+                    'Access-Control-Allow-Origin': 'https://example.com',
+                    'Access-Control-Allow-Credentials': 'true',
+                },
             });
         } catch (e) {
             throw e;
@@ -28,12 +35,19 @@ export class AccountController {
     async signIn(event: FusorRequest): Promise<APIGatewayProxyResultV2> {
         try {
             const { loginId, password } = event.customValues;
+            const data = await this.service.signIn({
+                loginId: loginId as string,
+                password: password as string,
+            });
             return generateResponse({
                 code: 200,
-                data: await this.service.signIn({
-                    loginId: loginId as string,
-                    password: password as string,
-                }),
+                data,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Set-Cookie': `sessionId=${data.sessionId}; Path=/; HttpOnly; Secure; SameSite=None`,
+                    'Access-Control-Allow-Origin': 'https://example.com',
+                    'Access-Control-Allow-Credentials': 'true',
+                },
             });
         } catch (e) {
             throw e;
@@ -51,12 +65,7 @@ export class AccountController {
                 tokenData,
                 sessionId,
             });
-            console.log({
-                task: 'after',
-                password,
-                tokenData,
-                sessionId,
-            });
+
             return generateResponse({
                 code: 200,
                 data: {
@@ -64,6 +73,7 @@ export class AccountController {
                 },
             });
         } catch (e) {
+            console.error(e);
             throw e;
         }
     }

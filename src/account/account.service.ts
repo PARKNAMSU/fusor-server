@@ -88,11 +88,18 @@ export class AccountService {
             throw e;
         }
     }
-    async signOut(dto: SignOutRequestDto): Promise<string> {
+    async signOut(dto: SignOutRequestDto) {
         try {
             const { password, sessionId, tokenData } = dto;
+            console.log({
+                password,
+                sessionId,
+                tokenDataId: tokenData.id,
+            });
+
             const account = await this.accountRepository.getByLoginId(tokenData.loginId);
-            if (!account || account.password !== generateHash(password, getSecretPasswordKey())) {
+
+            if (!account || account?.password !== generateHash(password, getSecretPasswordKey())) {
                 throw generateResponse({
                     code: 401,
                     data: {
@@ -102,7 +109,6 @@ export class AccountService {
                 });
             }
             await redis.delete(sessionId);
-            return 'out';
         } catch (e) {
             console.log(e);
             throw e;

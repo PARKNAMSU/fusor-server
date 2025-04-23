@@ -39,3 +39,11 @@ export const invalidLoginId: APIGatewayProxyResultV2 = {
         message: 'invalid email',
     }),
 };
+
+export const adminValidationFail: APIGatewayProxyResultV2 = {
+    statusCode: 401,
+    body: JSON.stringify({
+        code: 'INVALID-ADMIN',
+        message: 'invalid admin',
+    }),
+};
