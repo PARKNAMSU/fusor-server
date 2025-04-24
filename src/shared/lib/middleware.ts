@@ -18,7 +18,7 @@ export class CommonMiddleware {
 
             const cookies = cookieParsor(cookieHeader);
 
-            const tokenData = await redis.get<TokenData>(cookies['session_id']);
+            const tokenData = await redis.get<TokenData>(`account:${cookies['session_id']}`);
 
             if (!tokenData) throw notExistAccount;
 

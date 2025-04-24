@@ -75,7 +75,7 @@ export class AccountService {
                 platforms: await this.platformRepository.getList(account.id),
             };
 
-            redis.set(sessionId, tokenData, {
+            redis.set(`account:${sessionId}`, tokenData, {
                 sync: false,
                 ttl: USER_SESSION_EXPIRED_PERIOD,
             });
@@ -108,7 +108,7 @@ export class AccountService {
                     },
                 });
             }
-            await redis.delete(sessionId);
+            await redis.delete(`account:${sessionId}`);
         } catch (e) {
             console.log(e);
             throw e;
