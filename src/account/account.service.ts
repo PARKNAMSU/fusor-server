@@ -1,5 +1,6 @@
 import { TokenData } from '../shared/@types/account.types';
 import { USER_SESSION_EXPIRED_PERIOD } from '../shared/configs/common.configs';
+import { aleadyExist } from '../shared/configs/response.configs';
 import { getSecretPasswordKey } from '../shared/configs/secret.configs';
 import { generateHash } from '../shared/lib/authenticate';
 import redis from '../shared/lib/redis';
@@ -25,9 +26,8 @@ export class AccountService {
     async signUp(dto: SignUpRequestDto): Promise<SignUpResponseDto> {
         try {
             const { loginId, password } = dto;
-            // todo: getItem 을 통한 검색은 primary key 를 통해서만 가능. gsi 사용 시 query 로 변경
             if (!!(await this.accountRepository.getByLoginId(loginId))) {
-                throw new Error('exist');
+                throw aleadyExist;
             }
 
             const data = await this.accountRepository.create({ loginId, password });

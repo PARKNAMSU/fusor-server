@@ -47,3 +47,11 @@ export const adminValidationFail: APIGatewayProxyResultV2 = {
         message: 'invalid admin',
     }),
 };
+
+export const aleadyExist: APIGatewayProxyResultV2 = {
+    statusCode: 400,
+    body: JSON.stringify({
+        code: 'ALEADY-EXIST',
+        message: 'exist account',
+    }),
+};

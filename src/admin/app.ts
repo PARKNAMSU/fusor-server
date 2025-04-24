@@ -3,6 +3,7 @@ import { invalidUrl } from '../shared/configs/response.configs';
 import { FusorRequest } from '../shared/@types/common.types';
 import { CommonMiddleware } from '../shared/lib/middleware';
 import { errorHandler } from '../shared/lib/response';
+import controller from './admin.init';
 
 process.on('unhandledRejection', (reason) => {
     console.error('Unhandled rejection:', reason);
@@ -24,12 +25,10 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
     }
 
     try {
+        commonMiddleware.bodyParsor();
         if (method === 'PUT' && path2 === 'signup') {
-            commonMiddleware.bodyParsor();
         } else if (method === 'POST' && path2 === 'signin') {
-            commonMiddleware.bodyParsor();
         } else if (method === 'POST' && path2 === 'signout') {
-            commonMiddleware.bodyParsor();
         }
     } catch (err: Error | APIGatewayProxyResultV2 | any) {
         return errorHandler(err);
